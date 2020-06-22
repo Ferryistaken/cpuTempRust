@@ -2,6 +2,17 @@
 use std::process::Command;
 
 
+// this returns an index if the specified interface is found
+fn findIndex(list: &Vec<&str>, substring: &String) -> Result<usize, String> {
+    for i in 0..list.len() {
+        if list[i].contains(substring) {
+            return Ok(i);
+        }
+    }
+    return Err(String::from("Could not find interface"));
+}
+
+
 fn makeString(stdout: &Vec<u8>) -> String {
     // executing a command returns an array of u8 instead of chars, this simply turns them into
     // chars and then returns all of them as a string
@@ -9,14 +20,20 @@ fn makeString(stdout: &Vec<u8>) -> String {
     return string
 }
 
+
+
 fn main() {
-    let commandOut = Command::new("sensors").output().expect("Failed to execute command");
-    let output = makeString(&commandOut.stdout).replace("\n", "||");
+    let command = Command::new("sensors").arg("-u").output().expect("Failed to execute command");
+    let command = makeString(&command.stdout);
 
-    let lines: Vec<&str> = output.split("||").collect();
+    let lines: Vec<&str> = command.split("\n").collect();
 
-    let mut temp = lines[8].to_string();
+    let reading = lines[findIndex(&lines, &String::from("Tdie:")).unwrap_or(00) + 1].to_string();
+    let reading: Vec<&str> = reading.split(":").collect();
 
-    temp = temp.replace("Tdie:         ", "");
-    println!("{}", temp);
+    let mut temp: String = reading[1].to_string();
+    temp = temp.replace(" ", "");
+    temp.pop();
+    temp.pop();
+    println!("{} °C", temp);
 }
