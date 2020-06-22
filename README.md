@@ -1,0 +1,2 @@
+# Monitor cpu temperature in rust
+This is a tool to monitor cpu temperature in rust, it will probably not work on most systems so I don't suggest installing it, it will work on any system if you make a slight change to the source code.
